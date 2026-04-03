@@ -20,6 +20,7 @@ install(DIRECTORY
 install(
   PROGRAMS
     src/ll_controller.py
+    src/ll_controller_sim.py
     src/utils.py
   DESTINATION lib/${PROJECT_NAME}
 )

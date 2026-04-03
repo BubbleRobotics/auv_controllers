@@ -46,13 +46,10 @@ public:
   PolynomialThrustCurveController() = default;
 
   auto on_init() -> controller_interface::CallbackReturn override;
-
   auto on_configure(const rclcpp_lifecycle::State & previous_state) -> controller_interface::CallbackReturn override;
-
   auto on_activate(const rclcpp_lifecycle::State & previous_state) -> controller_interface::CallbackReturn override;
 
   auto command_interface_configuration() const -> controller_interface::InterfaceConfiguration override;
-
   auto state_interface_configuration() const -> controller_interface::InterfaceConfiguration override;
 
   auto update_and_write_commands(const rclcpp::Time & time, const rclcpp::Duration & period)
@@ -60,13 +57,22 @@ public:
 
 protected:
   auto on_export_reference_interfaces() -> std::vector<hardware_interface::CommandInterface> override;
-
   auto update_reference_from_subscribers(const rclcpp::Time & time, const rclcpp::Duration & period)
     -> controller_interface::return_type override;
 
   auto update_parameters() -> void;
-
   auto configure_parameters() -> controller_interface::CallbackReturn;
+
+  auto load_lookup_table_from_csv(const std::string & csv_path) -> bool;
+  auto lookup_pwm_from_thrust(double thrust_newtons) const -> int;
+
+  struct ThrustPwmSample
+  {
+    double thrust;  // Newtons
+    double pwm;     // microseconds
+  };
+
+  std::vector<ThrustPwmSample> thrust_pwm_table_;
 
   realtime_tools::RealtimeBuffer<std_msgs::msg::Float64> reference_;
   std::shared_ptr<rclcpp::Subscription<std_msgs::msg::Float64>> reference_sub_;

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<library path="fake_thruster_hardware">
+  <class
+    name="fake_thruster_hardware/FakeThrusterHardware"
+    type="fake_thruster_hardware::FakeThrusterHardware"
+    base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Fake thruster hardware that exports pwm command interfaces and does nothing in write().
+    </description>
+  </class>
+</library>
