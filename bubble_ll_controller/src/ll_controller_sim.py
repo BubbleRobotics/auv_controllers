@@ -67,7 +67,7 @@ class Ll_controller(Node):
         self.kgf_to_N = float(config.get("Kgf_to_N", 0.980665))
         self.isArmed = True # TODO default to False and require gamepad arming for safety
 
-        self.num_thrusters = 6
+        self.num_thrusters = 8
         self.channels = list(range(self.num_thrusters))
 
         self.topics: List[str] = [
@@ -77,6 +77,8 @@ class Ll_controller(Node):
             "/thruster_4_controller/status",
             "/thruster_5_controller/status",
             "/thruster_6_controller/status",
+            "/thruster_7_controller/status",
+            "/thruster_8_controller/status",
         ]
 
         self.declare_parameter("joy_button_a", 0)
@@ -143,6 +145,12 @@ class Ll_controller(Node):
         self.sub6 = self.create_subscription(
             SingleDOFStateStamped, self.topics[5], lambda m: self._cb_thruster(5, m), 10
         )
+        self.sub7 = self.create_subscription(
+            SingleDOFStateStamped, self.topics[6], lambda m: self._cb_thruster(6, m), 10
+        )
+        self.sub7 = self.create_subscription(
+            SingleDOFStateStamped, self.topics[7], lambda m: self._cb_thruster(7, m), 10
+        )
 
         # ROS topics bridged to Gazebo cmd_thrust
         self.pub1 = self.create_publisher(Float64, "/bluerov2/thruster1_cmd", 10)
@@ -151,8 +159,11 @@ class Ll_controller(Node):
         self.pub4 = self.create_publisher(Float64, "/bluerov2/thruster4_cmd", 10)
         self.pub5 = self.create_publisher(Float64, "/bluerov2/thruster5_cmd", 10)
         self.pub6 = self.create_publisher(Float64, "/bluerov2/thruster6_cmd", 10)
+        self.pub7 = self.create_publisher(Float64, "/bluerov2/thruster7_cmd", 10)
+        self.pub8 = self.create_publisher(Float64, "/bluerov2/thruster8_cmd", 10)
+
         self.thrust_publishers = [
-            self.pub1, self.pub2, self.pub3, self.pub4, self.pub5, self.pub6
+            self.pub1, self.pub2, self.pub3, self.pub4, self.pub5, self.pub6, self.pub7, self.pub8
         ]
 
         self.subjoy = self.create_subscription(Joy, "/joy", self._cb_joy, 10)
