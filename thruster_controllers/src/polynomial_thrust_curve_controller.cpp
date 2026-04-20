@@ -76,7 +76,7 @@ auto PolynomialThrustCurveController::configure_parameters() -> controller_inter
   std::string csv_path;
   try {
     const auto share_dir = ament_index_cpp::get_package_share_directory("thruster_controllers");
-    csv_path = share_dir + "t200_measured_data/pwm_thrust_measurement.csv";
+    csv_path = share_dir + "/t200_measured_data/pwm_thrust_measurements.csv";
   } catch (const std::exception & e) {
     RCLCPP_ERROR(logger_, "Failed to locate thruster_controllers share directory: %s", e.what());  // NOLINT
     return controller_interface::CallbackReturn::ERROR;
