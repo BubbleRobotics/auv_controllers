@@ -85,4 +85,9 @@ ament_export_dependencies(
     "control_msgs"
 )
 
+install(
+  DIRECTORY t200_measured_data/
+  DESTINATION share/${PROJECT_NAME}/t200_measured_data
+)
+
 ament_package()

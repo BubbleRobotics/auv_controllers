@@ -108,6 +108,9 @@ thruster_1_controller:
     thruster: thruster_1_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_2_controller:
@@ -115,6 +118,9 @@ thruster_2_controller:
     thruster: thruster_2_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_3_controller:
@@ -122,6 +128,9 @@ thruster_3_controller:
     thruster: thruster_3_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_4_controller:
@@ -129,6 +138,9 @@ thruster_4_controller:
     thruster: thruster_4_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_5_controller:
@@ -136,6 +148,9 @@ thruster_5_controller:
     thruster: thruster_5_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_6_controller:
@@ -143,6 +158,9 @@ thruster_6_controller:
     thruster: thruster_6_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_7_controller:
@@ -150,6 +168,9 @@ thruster_7_controller:
     thruster: thruster_7_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster_8_controller:
@@ -157,4 +178,7 @@ thruster_8_controller:
     thruster: thruster_8_joint
     min_thrust: -40.0
     max_thrust: 60.0
+    min_deadband_pwm: 1470
+    max_deadband_pwm: 1530
+    neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
