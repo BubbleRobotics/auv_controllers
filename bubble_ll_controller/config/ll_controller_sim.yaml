@@ -5,7 +5,7 @@ min_pwm_us: 1100.0
 max_pwm_us: 1900.0
 update_rate_hz: 200.0
 Kgf_to_N: 9.80665
-pwm_thrust_csv_pth: "/home/ubuntu/ws_blue/src/bubble_controller/bubble_ll_controller/t200_measured_data/pwm_thrust_measurement.csv"
+pwm_thrust_csv_pth: "/home/ubuntu/ws_blue/src/bubble_controller/bubble_ll_controller/t200_measured_data/pwm_thrust_measurements.csv"
 enable_pitch_control: false
 
 

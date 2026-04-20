@@ -15,6 +15,7 @@ from control_msgs.msg import SingleDOFStateStamped
 from std_msgs.msg import Float64MultiArray, Float64
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
+import ament_index_python.packages as ament_index
 
 from utils import (
     clamp_float,
@@ -94,8 +95,9 @@ class Ll_controller(Node):
         self._prev_joy_buttons: Optional[List[int]] = None
 
         # CSV path
-        csv_default = "/home/ubuntu/ws_blue/src/bubble_controller/bubble_ll_controller/t200_measured_data/pwm_thrust_measurement.csv"
-        self.csv_path = str(config.get("pwm_thrust_csv_pth", csv_default))
+        share_dir = ament_index.get_package_share_directory("thruster_controllers")
+        csv_default = share_dir + "/t200_measured_data/pwm_thrust_measurements.csv"
+        self.csv_path = str(config.get("pwm_thrust_csv_path", csv_default))
 
         # Load measured PWM -> thrust data
         self.pwm_samples_us, self.thrust_samples_n = self._load_pwm_thrust_csv(self.csv_path)

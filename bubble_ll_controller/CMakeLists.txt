@@ -37,4 +37,9 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+install(
+  FILES t200_measured_data/pwm_thrust_measurements.csv
+  DESTINATION share/${PROJECT_NAME}/t200_measured_data
+)
+
 ament_package()
