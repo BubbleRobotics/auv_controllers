@@ -78,6 +78,8 @@ class Ll_controller(Node):
         self.NEUTRAL_US = float(config.get("neutral_us", 1500.0))
         self.MIN_US = float(config.get("min_pwm_us", 1100.0))
         self.MAX_US = float(config.get("max_pwm_us", 1900.0))
+        self.MIN_US_AUV = float(1200.0)
+        self.MAX_US_AUV = float(1800.0)
 
         # Precomputed neutral raw value for the PWM driver
         self.NEUTRAL_RAW = us_to_value(self.NEUTRAL_US, self.PWM_FREQ_HZ)
@@ -540,7 +542,10 @@ class Ll_controller(Node):
             else:
                 send_us = target_us
             # Convert to raw PWM value
-            send_us = clamp_float(send_us, self.MIN_US, self.MAX_US)
+            if self._mode == ControlMode.AUV_CONTROLLER:
+                send_us = clamp_float(send_us, self.MIN_US_AUV, self.MAX_US_AUV)
+            else:
+                send_us = clamp_float(send_us, self.MIN_US, self.MAX_US)
             raw = us_to_value(send_us, self.PWM_FREQ_HZ)
             values_raw.append(raw)
 
