@@ -68,6 +68,17 @@ protected:
 
   auto configure_parameters() -> controller_interface::CallbackReturn;
 
+  auto load_lookup_table_from_csv(const std::string & csv_path) -> bool;
+  auto lookup_pwm_from_thrust(double thrust_newtons) const -> int;
+
+  struct ThrustPwmSample
+  {
+    double thrust;  // Newtons
+    double pwm;     // microseconds
+  };
+
+  std::vector<ThrustPwmSample> thrust_pwm_table_;
+
   realtime_tools::RealtimeBuffer<std_msgs::msg::Float64> reference_;
   std::shared_ptr<rclcpp::Subscription<std_msgs::msg::Float64>> reference_sub_;
 

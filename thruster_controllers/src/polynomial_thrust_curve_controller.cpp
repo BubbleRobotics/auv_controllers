@@ -23,8 +23,13 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <fstream>
+#include <limits>
 #include <ranges>
+#include <sstream>
+#include <string>
 
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 
 namespace thruster_controllers
@@ -33,13 +38,16 @@ namespace thruster_controllers
 namespace
 {
 
-[[nodiscard]] auto calculate_pwm_from_thrust_curve(double force, const std::vector<double> & coefficients) -> int
+constexpr double KGF_TO_NEWTON = 9.80665;
+
+[[nodiscard]] auto trim(const std::string & s) -> std::string
 {
-  double pwm = 0.0;
-  for (auto [i, coeff] : std::views::enumerate(coefficients)) {
-    pwm += coeff * std::pow(force, i);
+  const auto first = s.find_first_not_of(" \t\r\n");
+  if (first == std::string::npos) {
+    return "";
   }
-  return static_cast<int>(std::round(pwm));
+  const auto last = s.find_last_not_of(" \t\r\n");
+  return s.substr(first, last - first + 1);
 }
 
 }  // namespace
@@ -65,13 +73,133 @@ auto PolynomialThrustCurveController::configure_parameters() -> controller_inter
 {
   update_parameters();
   thruster_name_ = params_.thruster;
+
+  std::string csv_path;
+  try {
+    const auto share_dir = ament_index_cpp::get_package_share_directory("thruster_controllers");
+    csv_path = share_dir + "/t200_measured_data/pwm_thrust_measurements.csv";
+  } catch (const std::exception & e) {
+    RCLCPP_ERROR(logger_, "Failed to locate thruster_controllers share directory: %s", e.what());  // NOLINT
+    return controller_interface::CallbackReturn::ERROR;
+  }
+
+  if (!load_lookup_table_from_csv(csv_path)) {
+    RCLCPP_ERROR(logger_, "Failed to load thrust/PWM lookup table from: %s", csv_path.c_str());  // NOLINT
+    return controller_interface::CallbackReturn::ERROR;
+  }
+
+  RCLCPP_INFO(logger_, "Loaded %zu thrust/PWM samples from %s", thrust_pwm_table_.size(), csv_path.c_str());  // NOLINT
   return controller_interface::CallbackReturn::SUCCESS;
+}
+
+auto PolynomialThrustCurveController::load_lookup_table_from_csv(const std::string & csv_path) -> bool
+{
+  std::ifstream file(csv_path);
+  if (!file.is_open()) {
+    RCLCPP_ERROR(logger_, "Could not open CSV file: %s", csv_path.c_str());  // NOLINT
+    return false;
+  }
+
+  thrust_pwm_table_.clear();
+
+  std::string line;
+  if (!std::getline(file, line)) {
+    RCLCPP_ERROR(logger_, "CSV file is empty: %s", csv_path.c_str());  // NOLINT
+    return false;
+  }
+
+  // Expect header like:
+  // PWM (µs),Force (Kg f)
+  while (std::getline(file, line)) {
+    line = trim(line);
+    if (line.empty()) {
+      continue;
+    }
+
+    std::stringstream ss(line);
+    std::string pwm_str;
+    std::string thrust_str;
+
+    if (!std::getline(ss, pwm_str, ',')) {
+      continue;
+    }
+    if (!std::getline(ss, thrust_str, ',')) {
+      continue;
+    }
+
+    try {
+      const double pwm = std::stod(trim(pwm_str));
+      const double thrust_kgf = std::stod(trim(thrust_str));
+      const double thrust_newtons = thrust_kgf * KGF_TO_NEWTON;
+
+      thrust_pwm_table_.push_back(ThrustPwmSample{
+        .thrust = thrust_newtons,
+        .pwm = pwm,
+      });
+    } catch (const std::exception & e) {
+      RCLCPP_WARN(logger_, "Skipping malformed CSV row '%s': %s", line.c_str(), e.what());  // NOLINT
+    }
+  }
+
+  if (thrust_pwm_table_.size() < 2) {
+    RCLCPP_ERROR(logger_, "Lookup table must contain at least 2 valid rows");  // NOLINT
+    return false;
+  }
+
+  std::sort(
+    thrust_pwm_table_.begin(), thrust_pwm_table_.end(),
+    [](const ThrustPwmSample & a, const ThrustPwmSample & b) {
+      return a.thrust < b.thrust;
+    });
+
+  return true;
+}
+
+auto PolynomialThrustCurveController::lookup_pwm_from_thrust(double thrust_newtons) const -> int
+{
+  if (thrust_pwm_table_.empty()) {
+    return params_.neutral_pwm;
+  }
+
+  // Clamp below measured range
+  if (thrust_newtons <= thrust_pwm_table_.front().thrust) {
+    return static_cast<int>(std::round(thrust_pwm_table_.front().pwm));
+  }
+
+  // Clamp above measured range
+  if (thrust_newtons >= thrust_pwm_table_.back().thrust) {
+    return static_cast<int>(std::round(thrust_pwm_table_.back().pwm));
+  }
+
+  const auto upper = std::lower_bound(
+    thrust_pwm_table_.begin(), thrust_pwm_table_.end(), thrust_newtons,
+    [](const ThrustPwmSample & sample, double value) {
+      return sample.thrust < value;
+    });
+
+  const auto lower = std::prev(upper);
+
+  const double t0 = lower->thrust;
+  const double t1 = upper->thrust;
+  const double p0 = lower->pwm;
+  const double p1 = upper->pwm;
+
+  if (std::abs(t1 - t0) < 1e-9) {
+    return static_cast<int>(std::round(p0));
+  }
+
+  const double alpha = (thrust_newtons - t0) / (t1 - t0);
+  const double pwm = p0 + alpha * (p1 - p0);
+
+  return static_cast<int>(std::round(pwm));
 }
 
 auto PolynomialThrustCurveController::on_configure(const rclcpp_lifecycle::State & /*previous_state*/)
   -> controller_interface::CallbackReturn
 {
-  configure_parameters();
+  if (configure_parameters() != controller_interface::CallbackReturn::SUCCESS) {
+    return controller_interface::CallbackReturn::ERROR;
+  }
 
   reference_.writeFromNonRT(std_msgs::msg::Float64());
   command_interfaces_.reserve(1);
@@ -150,7 +278,7 @@ auto PolynomialThrustCurveController::update_and_write_commands(
 
   if (!std::isnan(reference)) {
     const double clamped_reference = std::clamp(reference, params_.min_thrust, params_.max_thrust);
-    pwm = calculate_pwm_from_thrust_curve(clamped_reference, params_.thrust_curve_coefficients);
+    pwm = lookup_pwm_from_thrust(clamped_reference);
     pwm = pwm > params_.min_deadband_pwm && pwm < params_.max_deadband_pwm ? params_.neutral_pwm : pwm;
   }
 
