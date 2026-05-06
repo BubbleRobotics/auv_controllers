@@ -29,8 +29,13 @@ target_link_libraries(
 )
 
 install(
-    TARGETS controller_coordinator controller_coordinator_parameters
-    DESTINATION lib/controller_coordinator
+  TARGETS controller_coordinator
+  DESTINATION lib/controller_coordinator
+)
+
+install(
+  TARGETS controller_coordinator_parameters
+  EXPORT export_controller_coordinator_parameters
 )
 
 ament_package()
