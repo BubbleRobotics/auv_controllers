@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 30 # Hz
+    update_rate: 100 # Hz
 
     adaptive_integral_terminal_sliding_mode_controller:
       type: velocity_controllers/AdaptiveIntegralTerminalSlidingModeController
@@ -52,8 +52,8 @@ adaptive_integral_terminal_sliding_mode_controller:
         mu: 0.01
       z:
         alpha: 12.0
-        k1_min: 0.4
-        k2: 0.8
+        k1_min: 0.2
+        k2: 0.4
         k_theta: 2.0
         mu: 0.01
       rx:
@@ -99,8 +99,8 @@ thruster_allocation_matrix_controller:
       x:  [-0.707,  -0.707,   0.707,  0.707,      0.0,     0.0,      0.0,     0.0]
       y:  [ 0.707,  -0.707,   0.707, -0.707,      0.0,     0.0,      0.0,     0.0]
       z:  [   0.0,     0.0,     0.0,    0.0,      1.0,     1.0,      1.0,     1.0]
-      rx: [   0.0,     0.0,     0.0,    0.0, -0.21805, 0.21805, -0.21805, 0.21805]
-      ry: [   0.0,     0.0,     0.0,    0.0,    -0.12,   -0.12,     0.12,    0.12]
+      rx: [    -0.06,     0.06,     -0.06,    0.06,   0.21805, -0.21805, 0.21805, -0.21805]
+      ry: [    -0.06,     -0.06,     0.06,    0.06,    -0.12,   -0.12,     0.12,    0.12]
       rz: [0.1888, -0.1888, -0.1888, 0.1888,      0.0,     0.0,      0.0 ,    0.0]
 
 thruster_1_controller:
